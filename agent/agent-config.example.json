@@ -1,0 +1,5 @@
+{
+  "agentKey": "your-agent-key-from-dashboard",
+  "platformUrl": "ws://localhost:3000",
+  "minecraftPath": "/path/to/your/minecraft/server"
+}

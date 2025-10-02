@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User accounts
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  servers       Server[]
+  accounts      Account[]
+  sessions      Session[]
+
+  @@map("users")
+}
+
+// NextAuth Account model
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+// NextAuth Session model
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// Minecraft servers managed by users
+model Server {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+
+  // Connection info
+  agentKey    String   @unique // Secret key for agent authentication
+  isConnected Boolean  @default(false)
+  lastSeen    DateTime?
+
+  // SSH credentials (encrypted)
+  sshHost       String?
+  sshPort       Int?     @default(22)
+  sshUsername   String?
+  sshPrivateKey String?  @db.Text // Encrypted private key
+  minecraftPath String? // Path to Minecraft server on remote machine
+  agentDeployed Boolean @default(false)
+
+  // Server details (reported by agent)
+  serverType  String?  // vanilla, fabric, forge, paper, etc.
+  mcVersion   String?
+  port        Int?
+  maxPlayers  Int?
+
+  // Status
+  status      String   @default("offline") // offline, starting, online, stopping
+  playersOnline Int?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("servers")
+}

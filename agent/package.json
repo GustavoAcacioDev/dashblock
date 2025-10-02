@@ -1,0 +1,16 @@
+{
+  "name": "dashblock-agent",
+  "version": "1.0.0",
+  "description": "Dashblock Agent - Minecraft Server Management Agent",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "install-service": "node install-service.js"
+  },
+  "keywords": ["minecraft", "server", "management"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "socket.io-client": "^4.8.1"
+  }
+}
